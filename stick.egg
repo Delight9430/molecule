@@ -1,0 +1,50 @@
+<VertexPool> cube {
+  <Vertex> 0 {
+    -0.1125 -1 -0.1125
+  }
+  <Vertex> 1 {
+    0.1375 -1 -0.1125
+  }
+  <Vertex> 2 {
+    0.1375 1 -0.1125
+  }
+  <Vertex> 3 {
+    -0.1125 1 -0.1125
+  }
+  <Vertex> 4 {
+    -0.1125 -1 0.1375
+  }
+  <Vertex> 5 {
+    0.1125 -1 0.1125
+  }
+  <Vertex> 6 {
+    0.1125 1 0.1125
+  }
+  <Vertex> 7 {
+    -0.1125 1 0.1375
+  }
+}
+<Polygon> {
+  <VertexRef> { 2 1 0 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 0 3 2 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 2 3 7 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 4 0 1 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 7 4 1 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 1 2 7 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 3 0 4 <Ref> { cube } }
+}
+<Polygon> {
+  <VertexRef> { 4 7 3 <Ref> { cube } }
+}
