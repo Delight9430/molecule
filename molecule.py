@@ -1,143 +1,16 @@
 # molecule.py
+from drawable import *
+
 from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
-from math import pi, atan2, degrees
-import copy
-from panda3d.core import WindowProperties, LVecBase3f, LVecBase4f
-from panda3d.core import CollisionTraverser, CollisionNode, CollisionHandlerQueue
-from panda3d.core import CollisionRay, CollisionSphere, BitMask32
-from panda3d.core import Point3, LVecBase3f
 from direct.gui.DirectGui import DirectButton
+from direct.task import Task
 
-class Drawable:
-    def __init__(self, world, file_name,
-                 pos = LVecBase3f(0.0, 20.0, 0.0), 
-                 color = LVecBase4f(1, 0, 0, 1), size = 2.5, scale = 1):
-        self._file_name = file_name
-        self.pos = pos
-        self._color = color
-        self._world = world
-        self.size = LVecBase3f(size, size, size)
-        self.scale = LVecBase3f(scale, scale, scale)
-        self.model = self._world.loader.loadModel(self._file_name)
+from panda3d.core import WindowProperties
+from panda3d.core import CollisionTraverser, CollisionNode, CollisionHandlerQueue
+from panda3d.core import CollisionRay, BitMask32
 
-    def get_end(self):
-        #TODO: take into acount the shape
-        end = copy.deepcopy(self.pos)
-        end.x += self.size.x
-        return end
+import copy
 
-    def move(self, distance):
-        self.model.setPos(self.model.getPos() + distance)
-
-    def draw(self):
-        self.model.reparentTo(self._world.render)
-        self.model.setPos(self.pos)  # Position the second ball to the right
-        self.model.setColor(self._color)  # Set the color to orange (RGBA)
-        self.model.setScale(self.scale)
-        #self._model.ls()
-
-    def update(self):
-        pass
-
-class Bond(Drawable):
-    def __init__(self, world, pos, left , right):
-        super().__init__(world, "./stick.egg", pos,
-                         LVecBase4f(1, 1, 1, 1), size = 2.5, scale = 2)
-        # Rotate the bond
-        self.model.setHpr(0, 0, 90)
-        self._left = left
-        self._right = right
-
-    def update(self):
-        distance = self._left.model.getDistance(self._right.model)
-        newScale=copy.deepcopy(self.scale)
-        newScale.z=distance/2
-        self.model.setScale(newScale)
-        diffVector = self._left.model.getPos() - self._right.model.getPos()
-        angle = atan2(diffVector.getX(), diffVector.getZ())
-        angle_degrees = degrees(angle)
-        self.model.setHpr(0, 0, angle_degrees)
-        
-        # Calculate the mid-point
-        mid_point = (self._left.model.getPos() + self._right.model.getPos()) / 2
-        # Set model at the mid-point
-        self.model.setPos(mid_point)
-
-class Atom(Drawable):
-    def __init__(self, element, atom_id, world, pos):
-        if element == "H":
-            color = LVecBase4f(1, 1, 1, 1)
-        elif element == "O":
-            color = LVecBase4f(1, 0, 0, 1)
-        elif element == "C":
-            color = LVecBase4f(0, 0, 0, 1)
-        super().__init__(world, "models/misc/sphere.egg", pos, color)
-        self.element = element
-        self.atom_id = atom_id
-        # Add collision detecti,on to the model
-        collision_node = CollisionNode("model_collision")
-        collision_node.addSolid(CollisionSphere(Point3(0, 0, 0), 1))  # Adjust size
-        collision_node.setIntoCollideMask(BitMask32.bit(1))
-        collision_node_path = self.model.attachNewNode(collision_node)
-        collision_node_path.setPythonTag("owner", self)
-    
-class Molecule:
-    def __init__(self, world):
-        self.atoms = []
-        self.bonds = []
-        self.atom_count = 0
-        self._world = world
-        # We have to start 20 away from the camera
-        self._start_pos = LVecBase3f(-5, 30, 0)
-        self._end_pos = self._start_pos
-
-    def center(self):
-        pass
-
-    def add_atom(self, element, attached_to_id=None, dX = 0.0, angle = 0):
-        atom_pos = copy.deepcopy(self._end_pos)
-        atom_pos.z = atom_pos.z+dX
-        new_atom = Atom(element, self.atom_count, self._world,atom_pos) 
-                       
-        self._end_pos = new_atom.get_end()
-        self.atoms.append(new_atom)
-
-        if attached_to_id is not None:
-            attached_to_atom = self.get_atom_by_id(attached_to_id)
-            if attached_to_atom:
-                attached_to_atom.bonds.append(new_atom.atom_id)
-                new_atom.bonds.append(attached_to_atom.atom_id)
-            else:
-                print(f"No atom found with ID {attached_to_id}")
-
-        self.atom_count += 1
-        return new_atom
-    
-    def add_bond(self, left,right):
-        new_bond = Bond(self._world, 
-                        copy.deepcopy(self._end_pos),left,right)
-        self._end_pos = new_bond.get_end()
-        print(self._end_pos)
-        self.bonds.append(new_bond)
-
-    def draw(self):
-        for bond in self.bonds:
-            bond.draw()
-        for atom in self.atoms:
-            atom.draw()
-
-    def update(self):
-        for atom in self.atoms:
-            atom.update()
-        for bond in self.bonds:
-            bond.update()
-
-    def get_atom_by_id(self, atom_id):
-        for atom in self.atoms:
-            if atom.atom_id == atom_id:
-                return atom
-        return None
 
 class World(ShowBase):
 
@@ -232,13 +105,10 @@ class World(ShowBase):
         return task.cont  # Continue the task on the next frame
 
     def add_atom(self):
-        molecule = Molecule(world)
-        molecule.add_atom("C")
-        molecule.draw()
-        molecule.update()
-        self.set_molecule(molecule)
-
-
+        atom = self._molecule.add_atom("C")
+        print(atom.model.getPos())
+        atom.draw()
+        print(atom.pos)
 
 # Example usage
 if __name__ == "__main__":
@@ -246,11 +116,23 @@ if __name__ == "__main__":
     molecule = Molecule(world)
 
     h1 = molecule.add_atom("H")
+    h1.draw()
+    h1.move(LVecBase3f(-4, 0, 2))
     h2 = molecule.add_atom("H")
+    h2.draw()
+    h2.move(LVecBase3f(-4, 0, -2))
     c1 = molecule.add_atom("C")
+    c1.draw()
+    c1.move(LVecBase3f(-2, 0, 0))
     c2 = molecule.add_atom("C")
+    c2.draw()
+    c2.move(LVecBase3f(2, 0, 0))
     h3 = molecule.add_atom("H")
+    h3.draw()
+    h3.move(LVecBase3f(4, 0, 2))
     h4 = molecule.add_atom("H")
+    h4.draw()
+    h4.move(LVecBase3f(4, 0, -2))
     molecule.add_bond(h1, c1)
     molecule.add_bond(h2, c1)
     molecule.add_bond(c1, c2)
