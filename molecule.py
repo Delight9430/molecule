@@ -2,7 +2,7 @@
 from drawable import *
 
 from direct.showbase.ShowBase import ShowBase
-from direct.gui.DirectGui import DirectButton
+from direct.gui.DirectGui import DirectButton, DirectFrame, DirectLabel
 from direct.task import Task
 
 from panda3d.core import WindowProperties
@@ -17,6 +17,7 @@ class World(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
         # Click and drag stuff
+        self._is_menu_open = False
         self.target = None
         self.dragging = False
         self.start_mouse_pos = None
@@ -30,7 +31,7 @@ class World(ShowBase):
         self.button = DirectButton(text=("Add"),
                                     scale=0.1,  # Size of the button
                                     pos=(0, 0, -0.975),  # x = 0 (center), y = 0 (default), z = -0.8 (bottom)
-                                    command=self.add_atom)
+                                    command=self.open_menu)
     
         # Set up mouse ray for collision detection
         self.picker = CollisionTraverser()
@@ -50,6 +51,17 @@ class World(ShowBase):
         print("Waiting for mouse clicks...")
         # Add a task to track mouse pos
         self.taskMgr.add(self.track_mouse_task, "TrackMouseTask")
+
+        # Create atom menu
+        self.menu_frame = DirectFrame(frameColor=(0, 0, 0, 0.8),
+                                    frameSize=(-1, 1, -0.6, 0.6),
+                                    pos=(0, 0, 0))
+        self.carbon_button = DirectButton(text="add C",
+                                        scale=0.08,
+                                        pos=(0, 0, 0),
+                                        command=self.add_atom,
+                                        parent=self.menu_frame)
+        self.menu_frame.hide()
 
     def set_molecule(self, molecule):
         self._molecule = molecule
@@ -87,6 +99,11 @@ class World(ShowBase):
         self._molecule.draw()
         self._molecule.update()
 
+    def open_menu(self):
+        if not self._is_menu_open:
+            self._is_menu_open=True
+            self.menu_frame.show()
+
     def start_drag(self):
         if self.mouseWatcherNode.hasMouse():
             self.dragging = True
@@ -115,6 +132,8 @@ class World(ShowBase):
         return task.cont  # Continue the task on the next frame
 
     def add_atom(self):
+        self.menu_frame.hide()  # Hides the menu frame and its children
+        self._is_menu_open=False
         atom = self._molecule.add_atom("C")
         print(atom.model.getPos())
         atom.draw()
