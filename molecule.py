@@ -67,14 +67,25 @@ class World(ShowBase):
             self.picker.traverse(self.render)
             
             if self.queue.getNumEntries() > 0:
-                print("Collision detected")
                 self.queue.sortEntries()
                 entry = self.queue.getEntry(0)  # Closest hit
                 collidee = entry.getIntoNodePath()
+                if self.target != None:
+                    atom2 = collidee.getPythonTag("owner")
+                    if atom2 != self.target:
+                        print(f"Creating bond between {str(self.target.atom_id)} and {str(atom2.atom_id)}")
+                        self.add_bond(self.target, atom2)
+                        return
                 self.target = collidee.getPythonTag("owner")
-                print("collided with " + str(self.target.atom_id))
+                print("Clicked on " + str(self.target.atom_id))
                 self.start_drag()
-                #self.move_panda(Point3(0,5,0))
+            else:
+                self.target = None
+
+    def add_bond(self,atom1,atom2):
+        self._molecule.add_bond(atom1,atom2)
+        self._molecule.draw()
+        self._molecule.update()
 
     def start_drag(self):
         if self.mouseWatcherNode.hasMouse():
@@ -83,7 +94,6 @@ class World(ShowBase):
 
     def stop_drag(self):
         self.dragging = False
-        self.target = None
 
     def _get_drag_distance(self):
         if self.start_mouse_pos:
