@@ -9,21 +9,14 @@ import copy
 class Drawable:
     def __init__(self, world, file_name,
                  pos = LVecBase3f(0.0, 20.0, 0.0), 
-                 color = LVecBase4f(1, 0, 0, 1), size = 2.5, scale = 1):
+                 color = LVecBase4f(1, 0, 0, 1), scale = 1):
         self._file_name = file_name
         # This is redundant, should use getter
         self.pos = pos
         self._color = color
         self._world = world
-        self.size = LVecBase3f(size, size, size)
         self.scale = LVecBase3f(scale, scale, scale)
         self.model = self._world.loader.loadModel(self._file_name)
-
-    def get_end(self):
-        #TODO: take into acount the shape
-        end = copy.deepcopy(self.pos)
-        end.x += self.size.x
-        return end
 
     def move(self, distance):
         self.model.setPos(self.model.getPos() + distance)
@@ -42,7 +35,7 @@ class Drawable:
 class Bond(Drawable):
     def __init__(self, world, pos, left , right):
         super().__init__(world, "./stick.egg", pos,
-                         LVecBase4f(1, 1, 1, 1), size = 2.5, scale = 2)
+                         LVecBase4f(1, 1, 1, 1), scale = 2)
         # Rotate the bond
         self.model.setHpr(0, 0, 90)
         self._left = left
@@ -67,11 +60,17 @@ class Atom(Drawable):
     def __init__(self, element, atom_id, world, pos):
         if element == "H":
             color = LVecBase4f(1, 1, 1, 1)
+            size = 0.75
         elif element == "O":
             color = LVecBase4f(1, 0, 0, 1)
+            size = 1.0
         elif element == "C":
             color = LVecBase4f(0, 0, 0, 1)
-        super().__init__(world, "models/misc/sphere.egg", pos, color)
+            size = 1.0
+        elif element == "F":
+            color = LVecBase4f(1.0, 0.5, 0.0, 1.0)
+            size = 0.75
+        super().__init__(world, "models/misc/sphere.egg", pos, color, size)
         self.element = element
         self.atom_id = atom_id
         # Add collision detecti,on to the model

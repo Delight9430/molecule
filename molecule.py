@@ -56,13 +56,33 @@ class World(ShowBase):
         self.menu_frame = DirectFrame(frameColor=(0, 0, 0, 0.8),
                                     frameSize=(-1, 1, -0.6, 0.6),
                                     pos=(0, 0, 0))
+        # TODO add button wrapper, and don't save the handle
         self.carbon_button = DirectButton(text="add C",
                                         scale=0.08,
-                                        pos=(0, 0, 0),
+                                        pos=(-0.45, 0, 0),
                                         command=self.add_atom,
+                                        extraArgs=["C"],
                                         parent=self.menu_frame)
+        self.hydrogen_button = DirectButton(text="add H",
+                                        scale=0.08,
+                                        pos=(-0.15, 0, 0),
+                                        command=self.add_atom,
+                                        extraArgs=["H"],
+                                        parent=self.menu_frame)
+        self.oxygen_button = DirectButton(text="add O",
+                                        scale=0.08,
+                                        pos=(0.15, 0, 0),
+                                        command=self.add_atom,
+                                        extraArgs=["O"],
+                                        parent=self.menu_frame)
+        self.flourine_button = DirectButton(text="add F",
+                                        scale=0.08,
+                                        pos=(0.45, 0, 0),
+                                        command=self.add_atom,
+                                        extraArgs=["F"],
+                                        parent=self.menu_frame)
+ 
         self.menu_frame.hide()
-
     def set_molecule(self, molecule):
         self._molecule = molecule
 
@@ -131,44 +151,17 @@ class World(ShowBase):
             self._molecule.update()
         return task.cont  # Continue the task on the next frame
 
-    def add_atom(self):
+    def add_atom(self,element):
         self.menu_frame.hide()  # Hides the menu frame and its children
         self._is_menu_open=False
-        atom = self._molecule.add_atom("C")
+        atom = self._molecule.add_atom(element)
         print(atom.model.getPos())
         atom.draw()
-        print(atom.pos)
 
 # Example usage
 if __name__ == "__main__":
     world = World()
     molecule = Molecule(world)
-
-    h1 = molecule.add_atom("H")
-    h1.draw()
-    h1.move(LVecBase3f(-4, 0, 2))
-    h2 = molecule.add_atom("H")
-    h2.draw()
-    h2.move(LVecBase3f(-4, 0, -2))
-    c1 = molecule.add_atom("C")
-    c1.draw()
-    c1.move(LVecBase3f(-2, 0, 0))
-    c2 = molecule.add_atom("C")
-    c2.draw()
-    c2.move(LVecBase3f(2, 0, 0))
-    h3 = molecule.add_atom("H")
-    h3.draw()
-    h3.move(LVecBase3f(4, 0, 2))
-    h4 = molecule.add_atom("H")
-    h4.draw()
-    h4.move(LVecBase3f(4, 0, -2))
-    molecule.add_bond(h1, c1)
-    molecule.add_bond(h2, c1)
-    molecule.add_bond(c1, c2)
-    molecule.add_bond(h3, c2)
-    molecule.add_bond(h4, c2)
-    molecule.draw()
-    molecule.update()
     world.set_molecule(molecule)
     #world.camera.lookAt(molecule.atoms[-1]._model)     # Point the camera at the model
 
