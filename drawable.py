@@ -3,7 +3,7 @@
 from panda3d.core import Point3, LVecBase3f, LVecBase3f, LVecBase4f
 from panda3d.core import CollisionNode, CollisionSphere, BitMask32
 
-from math import atan2, degrees
+from math import atan2, degrees, sqrt
 import copy
 
 class Drawable:
@@ -18,16 +18,25 @@ class Drawable:
         self.scale = LVecBase3f(scale, scale, scale)
         self.model = self._world.loader.loadModel(self._file_name)
 
-    def move(self, distance):
-        self.model.setPos(self.model.getPos() + distance)
-        self.pos = self.model.getPos()
-
-    def draw(self):
         self.model.reparentTo(self._world.render)
         self.model.setPos(self.pos)
         self.model.setColor(self._color)
         self.model.setScale(self.scale)
-        #self._model.ls()
+
+    def move(self, distance):
+        self.model.setPos(self.model.getPos() + distance)
+        self.pos = self.model.getPos()
+
+    def get_distance(self, other):
+        pos1 = self.model.getPos()
+        pos2 = other.model.getPos()
+
+        dx = pos2.getX() - pos1.getX()
+        dy = pos2.getY() - pos1.getY()
+        dz = pos2.getZ() - pos1.getZ()
+
+        distance = sqrt(dx**2 + dy**2 + dz**2)
+        return distance
 
     def update(self):
         pass
@@ -42,9 +51,12 @@ class Bond(Drawable):
         self._right = right
 
     def update(self):
-        distance = self._left.model.getDistance(self._right.model)
+        print(f"left: {self._left.model.getPos()}, right {self._right.model.getPos()}")
+        distance = self._left.get_distance(self._right)
+        print(f"distance: {distance}")
         newScale=copy.deepcopy(self.scale)
         newScale.z=distance/2
+        print(f"scale: {newScale.z}")
         self.model.setScale(newScale)
         diffVector = self._left.model.getPos() - self._right.model.getPos()
         angle = atan2(diffVector.getX(), diffVector.getZ())
@@ -89,9 +101,6 @@ class Molecule:
         # We have to start backed away from the camera
         self.pos = LVecBase3f(0, 30, 0)
 
-    def center(self):
-        pass
-
     def add_atom(self, element):
         atom_pos = copy.deepcopy(self.pos)
         print(f"added atom at {atom_pos}")
@@ -106,12 +115,6 @@ class Molecule:
         new_bond = Bond(self._world, 
                         copy.deepcopy(self.pos),left,right)
         self.bonds.append(new_bond)
-
-    def draw(self):
-        for bond in self.bonds:
-            bond.draw()
-        for atom in self.atoms:
-            atom.draw()
 
     def update(self):
         for atom in self.atoms:

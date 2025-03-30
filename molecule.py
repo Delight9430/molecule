@@ -52,35 +52,14 @@ class World(ShowBase):
         # Add a task to track mouse pos
         self.taskMgr.add(self.track_mouse_task, "TrackMouseTask")
 
-        # Create atom menu
+        # Create atom men
         self.menu_frame = DirectFrame(frameColor=(0, 0, 0, 0.8),
                                     frameSize=(-1, 1, -0.6, 0.6),
                                     pos=(0, 0, 0))
-        # TODO add button wrapper, and don't save the handle
-        self.carbon_button = DirectButton(text="add C",
-                                        scale=0.08,
-                                        pos=(-0.45, 0, 0),
-                                        command=self.add_atom,
-                                        extraArgs=["C"],
-                                        parent=self.menu_frame)
-        self.hydrogen_button = DirectButton(text="add H",
-                                        scale=0.08,
-                                        pos=(-0.15, 0, 0),
-                                        command=self.add_atom,
-                                        extraArgs=["H"],
-                                        parent=self.menu_frame)
-        self.oxygen_button = DirectButton(text="add O",
-                                        scale=0.08,
-                                        pos=(0.15, 0, 0),
-                                        command=self.add_atom,
-                                        extraArgs=["O"],
-                                        parent=self.menu_frame)
-        self.flourine_button = DirectButton(text="add F",
-                                        scale=0.08,
-                                        pos=(0.45, 0, 0),
-                                        command=self.add_atom,
-                                        extraArgs=["F"],
-                                        parent=self.menu_frame)
+        self._add_button(element = "C", pos=(-0.45, 0, 0))
+        self._add_button(element = "H", pos=(-0.15, 0, 0))
+        self._add_button(element = "O", pos=(0.15, 0, 0))
+        self._add_button(element = "F", pos=(0.45, 0, 0))
  
         self.menu_frame.hide()
     def set_molecule(self, molecule):
@@ -116,7 +95,6 @@ class World(ShowBase):
 
     def add_bond(self,atom1,atom2):
         self._molecule.add_bond(atom1,atom2)
-        self._molecule.draw()
         self._molecule.update()
 
     def open_menu(self):
@@ -131,15 +109,6 @@ class World(ShowBase):
 
     def stop_drag(self):
         self.dragging = False
-
-    def _get_drag_distance(self):
-        if self.start_mouse_pos:
-            # Calculate the drag distance
-            current_mouse_pos = self.mouseWatcherNode.getMouse()
-            drag_x = current_mouse_pos.getX() - self.start_mouse_pos.getX()
-            drag_y = current_mouse_pos.getY() - self.start_mouse_pos.getY()
-            return (drag_x, drag_y)
-        return (0.0, 0.0)
 
     def track_mouse_task(self, task):
         if self.mouseWatcherNode.hasMouse() and self.dragging\
@@ -156,7 +125,23 @@ class World(ShowBase):
         self._is_menu_open=False
         atom = self._molecule.add_atom(element)
         print(atom.model.getPos())
-        atom.draw()
+
+    def _add_button(self, element, pos):
+        DirectButton(text="add " + element,
+                    scale=0.08,
+                    pos=pos,
+                    command=self.add_atom,
+                    extraArgs=[element],
+                    parent=self.menu_frame)
+
+    def _get_drag_distance(self):
+        if self.start_mouse_pos:
+            # Calculate the drag distance
+            current_mouse_pos = self.mouseWatcherNode.getMouse()
+            drag_x = current_mouse_pos.getX() - self.start_mouse_pos.getX()
+            drag_y = current_mouse_pos.getY() - self.start_mouse_pos.getY()
+            return (drag_x, drag_y)
+        return (0.0, 0.0)
 
 # Example usage
 if __name__ == "__main__":
