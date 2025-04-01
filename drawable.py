@@ -23,6 +23,9 @@ class Drawable:
         self.model.setColor(self._color)
         self.model.setScale(self.scale)
 
+    def __del__(self):
+        self.model.removeNode()
+
     def move(self, distance):
         self.model.setPos(self.model.getPos() + distance)
         self.pos = self.model.getPos()
@@ -42,13 +45,28 @@ class Drawable:
         pass
 
 class Bond(Drawable):
-    def __init__(self, world, pos, left , right):
+    def __init__(self, world, pos, left, right):
         super().__init__(world, "./stick.egg", pos,
                          LVecBase4f(1, 1, 1, 1), scale = 2)
         # Rotate the bond
         self.model.setHpr(0, 0, 90)
         self._left = left
         self._right = right
+
+    def has_atoms(self, first, second):
+        have_first=False
+        have_second=False
+        if first ==self._left:
+            have_first=True
+        elif first==self._right:
+            have_first=True
+
+        if second ==self._right:
+            have_second=True
+        elif second ==self._left:
+            have_second=True
+        return have_first and have_second
+
 
     def update(self):
         print(f"left: {self._left.model.getPos()}, right {self._right.model.getPos()}")
@@ -115,6 +133,13 @@ class Molecule:
         new_bond = Bond(self._world, 
                         copy.deepcopy(self.pos),left,right)
         self.bonds.append(new_bond)
+
+    def try_delete_bond(self, left, right):
+        for bond in self.bonds:
+            if bond.has_atoms(left, right):
+                self.bonds.remove(bond)
+                return True
+        return False
 
     def update(self):
         for atom in self.atoms:

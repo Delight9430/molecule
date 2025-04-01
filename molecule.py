@@ -84,9 +84,13 @@ class World(ShowBase):
                 if self.target != None:
                     atom2 = collidee.getPythonTag("owner")
                     if atom2 != self.target:
-                        print(f"Creating bond between {str(self.target.atom_id)} and {str(atom2.atom_id)}")
-                        self.add_bond(self.target, atom2)
-                        return
+                        if not self._molecule.try_delete_bond(self.target, atom2):
+                            self.add_bond(self.target, atom2)
+                            return
+                        else:
+                            self._molecule.update()
+                            print("deleted bond")
+                            return
                 self.target = collidee.getPythonTag("owner")
                 print("Clicked on " + str(self.target.atom_id))
                 self.start_drag()
