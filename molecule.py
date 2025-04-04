@@ -131,8 +131,9 @@ class World(ShowBase):
         print(atom.model.getPos())
 
     def _add_button(self, element, pos):
-        DirectButton(text="add " + element,
-                    scale=0.08,
+        image_name = element + ".Add.png"
+        DirectButton(image=image_name,
+                    scale=0.125,
                     pos=pos,
                     command=self.add_atom,
                     extraArgs=[element],
