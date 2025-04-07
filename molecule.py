@@ -60,7 +60,8 @@ class World(ShowBase):
         self._add_button(element = "H", pos=(-0.15, 0, 0))
         self._add_button(element = "O", pos=(0.15, 0, 0))
         self._add_button(element = "F", pos=(0.45, 0, 0))
- 
+        self._add_button(element = "Cl", pos=(-0.45, -0, -0.2975))
+        self._add_button(element = "S", pos=(-0.15, -0, -0.2975))
         self.menu_frame.hide()
     def set_molecule(self, molecule):
         self._molecule = molecule

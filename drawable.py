@@ -100,6 +100,12 @@ class Atom(Drawable):
         elif element == "F":
             color = LVecBase4f(1.0, 0.5, 0.0, 1.0)
             size = 0.75
+        elif element == "Cl":
+            color = LVecBase4f(0.0862, 0.6627, 0.2745, 1.0)
+            size = 1.0
+        elif element == "S":
+            color = LVecBase4f(1.0, 0.9490196078, 0.00000000000000, 1.0)
+            size = 1.0
         super().__init__(world, "models/misc/sphere.egg", pos, color, size)
         self.element = element
         self.atom_id = atom_id
